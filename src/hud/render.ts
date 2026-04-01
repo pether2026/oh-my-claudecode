@@ -432,10 +432,13 @@ export async function render(
   }
 
   // ── Assemble output using layout order ─────────────────────────────
+  const safeArray = (v: unknown, fallback: string[]): string[] =>
+    Array.isArray(v) ? v : fallback;
+
   const effectiveLayout: Required<LayoutConfig> = {
-    line1: config.layout?.line1 ?? DEFAULT_ELEMENT_ORDER.line1,
-    main: config.layout?.main ?? DEFAULT_ELEMENT_ORDER.main,
-    detail: config.layout?.detail ?? DEFAULT_ELEMENT_ORDER.detail,
+    line1: safeArray(config.layout?.line1, DEFAULT_ELEMENT_ORDER.line1),
+    main: safeArray(config.layout?.main, DEFAULT_ELEMENT_ORDER.main),
+    detail: safeArray(config.layout?.detail, DEFAULT_ELEMENT_ORDER.detail),
   };
 
   /** Collect inline elements in layout order.

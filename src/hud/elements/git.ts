@@ -5,7 +5,7 @@
  */
 
 import { execSync } from 'node:child_process';
-import { readFileSync } from 'node:fs';
+import { readFileSync, realpathSync } from 'node:fs';
 import { resolve, join } from 'node:path';
 import { dim, cyan } from '../colors.js';
 
@@ -136,8 +136,11 @@ export function getWorktreeInfo(cwd?: string): WorktreeDetection {
     const gitDir = (execSync('git rev-parse --git-dir', execOpts) as string).trim();
     const gitCommonDir = (execSync('git rev-parse --git-common-dir', execOpts) as string).trim();
 
-    const resolvedGitDir = resolve(key, gitDir);
-    const resolvedCommonDir = resolve(key, gitCommonDir);
+    // Canonicalize via realpathSync to handle symlinked repo paths
+    let resolvedGitDir = resolve(key, gitDir);
+    let resolvedCommonDir = resolve(key, gitCommonDir);
+    try { resolvedGitDir = realpathSync(resolvedGitDir); } catch { /* use resolved */ }
+    try { resolvedCommonDir = realpathSync(resolvedCommonDir); } catch { /* use resolved */ }
 
     if (resolvedGitDir !== resolvedCommonDir) {
       result = { isWorktree: true, baseBranch: null };
